@@ -1,0 +1,31 @@
+{
+  "name": "oidc-trust-probe",
+  "version": "0.0.1",
+  "description": "Shows which GitHub Actions identity npm actually trusts at publish time — an OIDC Trusted Publishing claim inspector.",
+  "license": "MIT",
+  "author": "<your-name>",
+  "type": "module",
+  "main": "index.js",
+  "exports": "./index.js",
+  "files": [
+    "index.js"
+  ],
+  "keywords": [
+    "oidc",
+    "trusted-publishing",
+    "supply-chain",
+    "github-actions",
+    "provenance",
+    "security-research"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/<your-user>/oidc-trust-probe.git"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "node -e \"import('./index.js').then(m => { if (m.whoPublished() !== 'oidc-trust-probe') process.exit(1) })\""
+  }
+}

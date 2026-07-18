@@ -1,0 +1,27 @@
+name: publish-via-reusable
+
+# THE KEY TEST (seminar claim item 1).
+# This top-level workflow does NOT publish. It delegates the actual `npm publish`
+# to a reusable workflow (reusable-publish.yml, the "callee").
+#
+# When this runs, the OIDC token has:
+#   workflow_ref      -> publish-via-reusable.yml   (the CALLER)
+#   job_workflow_ref  -> reusable-publish.yml       (the CALLEE, where publish runs)
+#
+# Configure npm Trusted Publisher to trust THIS file (publish-via-reusable.yml),
+# then dispatch. If publish SUCCEEDS, npm matched the CALLER and never verified
+# the callee -> "caller-only check" confirmed empirically.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  delegate:
+    uses: ./.github/workflows/reusable-publish.yml
+    permissions:
+      id-token: write
+      contents: read

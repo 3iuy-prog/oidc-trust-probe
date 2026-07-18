@@ -1,0 +1,46 @@
+name: publish-direct
+
+# CONTROL RUN.
+# The top-level workflow runs `npm publish` itself. Here the OIDC token's
+# workflow_ref (caller) and job_workflow_ref (callee) are the SAME file.
+# Configure this file as the npm Trusted Publisher first, confirm it works,
+# then compare against publish-via-reusable.yml.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # required for OIDC / Trusted Publishing
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Use a Trusted-Publishing-capable npm
+        run: npm install -g npm@latest
+
+      - name: Dump OIDC token claims (seminar evidence)
+        run: |
+          TOKEN=$(curl -sSf \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm" | python3 -c 'import sys,json;print(json.load(sys.stdin)["value"])')
+          echo "----- OIDC claims (audience=npm) -----"
+          python3 - "$TOKEN" <<'PY'
+          import sys, base64, json
+          p = sys.argv[1].split('.')[1]
+          p += '=' * (-len(p) % 4)
+          claims = json.loads(base64.urlsafe_b64decode(p))
+          keep = ["sub", "aud", "repository", "ref", "workflow_ref", "job_workflow_ref", "environment", "runner_environment"]
+          print(json.dumps({k: claims.get(k) for k in keep}, indent=2))
+          PY
+
+      - name: Publish via Trusted Publishing (no token)
+        run: npm publish

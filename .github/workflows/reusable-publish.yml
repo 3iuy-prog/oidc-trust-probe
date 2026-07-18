@@ -1,0 +1,48 @@
+name: reusable-publish
+
+# THE CALLEE.
+# This file contains the code that actually runs `npm publish`. In the seminar's
+# threat model, an attacker who can change THIS file (e.g. via an unpinned branch
+# reference from another repo) executes their own publish step -- yet the OIDC
+# token's top-level workflow_ref still points at the trusted CALLER. If npm only
+# checks the caller, npm publishes attacker-controlled content under a trusted id.
+
+on:
+  workflow_call:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Use a Trusted-Publishing-capable npm
+        run: npm install -g npm@latest
+
+      - name: Dump OIDC token claims (seminar evidence)
+        run: |
+          echo "This step runs INSIDE the reusable workflow (the callee)."
+          TOKEN=$(curl -sSf \
+            -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=npm" | python3 -c 'import sys,json;print(json.load(sys.stdin)["value"])')
+          echo "----- OIDC claims (audience=npm) -----"
+          python3 - "$TOKEN" <<'PY'
+          import sys, base64, json
+          p = sys.argv[1].split('.')[1]
+          p += '=' * (-len(p) % 4)
+          claims = json.loads(base64.urlsafe_b64decode(p))
+          keep = ["sub", "aud", "repository", "ref", "workflow_ref", "job_workflow_ref", "environment", "runner_environment"]
+          print(json.dumps({k: claims.get(k) for k in keep}, indent=2))
+          PY
+
+      - name: Publish via Trusted Publishing (no token)
+        run: npm publish
