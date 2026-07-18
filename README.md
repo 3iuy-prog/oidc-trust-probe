@@ -1,5 +1,15 @@
 # oidc-trust-probe
 
+> ## ⚠️ 보안 연구·테스트 전용 패키지 · SECURITY RESEARCH — TEST-ONLY PACKAGE
+>
+> **이 패키지는 보안 세미나에서 npm OIDC Trusted Publishing의 동작을 실증·시연하기 위해서만 존재하며, 실질적인 기능이 전혀 없습니다.**
+> - **일반 사용 금지.** 실제 프로젝트에서 설치·의존·재배포하지 마십시오.
+> - 이 패키지의 사용(설치·발행·수정·배포 등)으로 발생하는 **모든 결과와 책임은 전적으로 사용자 본인에게 있으며**, 작성자는 어떠한 보증도 하지 않고 어떠한 책임도 지지 않습니다.
+>
+> **This package exists solely to demonstrate npm OIDC Trusted Publishing behavior for a security seminar and has no useful functionality whatsoever.**
+> - **Not for general use.** Do not install, depend on, or redistribute it in any real project.
+> - Use is entirely at your own risk. The author provides no warranty and accepts no liability for any consequences arising from its use.
+
 KRUG OIDC 세미나 **Tier 0 실증 도구** — npm Trusted Publishing이 reusable
 workflow를 검증할 때 **caller만 보는가, callee도 보는가**를 직접 확인한다.
 
