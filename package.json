@@ -1,6 +1,6 @@
 {
   "name": "oidc-trust-probe",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "[SECURITY TEST — DO NOT USE] Shows which GitHub Actions identity npm actually trusts at publish time — an OIDC Trusted Publishing claim inspector.",
   "license": "MIT",
   "author": "3iuy",
